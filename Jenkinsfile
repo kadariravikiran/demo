@@ -37,18 +37,19 @@ pipeline {
         stage('Deploy & Run on EC2') {
             steps {
                 sh '''
-                mkdir -p $APP_DIR
+                sudo mkdir -p $APP_DIR
 
                 # Stop old app if running
-                pkill -f $JAR_NAME || true
+                sudo pkill -f $JAR_NAME || true
 
                 # Copy new jar
-                cp $BUILD_JAR $APP_DIR/$JAR_NAME
+                sudo cp $BUILD_JAR $APP_DIR/$JAR_NAME
 
                 # Start app in background
-                nohup java -jar $APP_DIR/$JAR_NAME > $APP_DIR/app.log 2>&1 &
+                sudo nohup java -jar $APP_DIR/$JAR_NAME > $APP_DIR/app.log 2>&1 &
                 '''
             }
         }
     }
 }
+
