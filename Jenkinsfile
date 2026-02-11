@@ -11,7 +11,7 @@ pipeline{
     stages{
         stage('Checkout'){
             steps{
-               checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/danvisrinivas/demo.git']])
+               checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/kadariravikiran/demo.git']])
         }
         }
         stage('Build maven project'){
@@ -35,5 +35,6 @@ pipeline{
         }
     }
 }
+
 
 
