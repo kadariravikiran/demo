@@ -33,6 +33,31 @@ pipeline{
     }
 }
         }
+        stage('depoly'){
+  steps{
+    sh '''
+      set -eux
+
+      # copy latest jar
+      cp target/*.jar /opt/springboot-app/app.jar
+
+      # stop existing app on 9999
+      PID=$(sudo lsof -t -i:9999 || true)
+      if [ -n "$PID" ]; then
+        sudo kill -9 $PID
+      fi
+
+      # start new app from the correct path
+      nohup java -jar /opt/springboot-app/app.jar > /opt/springboot-app/app.log 2>&1 &
+      sleep 3
+
+      # verify new app
+      curl -f http://localhost:9999/test
+    '''
+  }
+}
+
     }
 }
+
 
