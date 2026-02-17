@@ -47,7 +47,6 @@ pipeline {
                   set -eux
                   test -f ${BUILD_JAR}
                   docker build --build-arg JAR_FILE=${BUILD_JAR} \
-                  -t ${IMAGE_FULL} \
                   -t ${IMAGE_LATEST} .
                 """
             }
@@ -57,7 +56,6 @@ pipeline {
             steps {
                 sh """
                   echo "${DOCKERHUB_PASS}" | docker login -u "${DOCKERHUB_USER}" --password-stdin
-                  docker push ${IMAGE_FULL}
                   docker push ${IMAGE_LATEST}
                   docker logout
                 """
@@ -65,5 +63,6 @@ pipeline {
         }
     }
 }
+
 
 
