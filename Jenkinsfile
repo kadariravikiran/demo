@@ -16,7 +16,7 @@ pipeline {
         DOCKERHUB_USER = "ravikirankadari"
         DOCKERHUB_PASS = "Ravi@1234"
 
-        DOCKERHUB_REPO = "ravikirankadari/spring-io"
+        DOCKERHUB_REPO = "ravikirankadari/spring-io:trysol"
 
         IMAGE_TAG    = "${BUILD_NUMBER}"
         IMAGE_FULL   = "${DOCKERHUB_REPO}:${IMAGE_TAG}"
@@ -65,3 +65,4 @@ pipeline {
         }
     }
 }
+
