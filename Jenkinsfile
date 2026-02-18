@@ -1,6 +1,3 @@
-
-
-
 pipeline {
     agent any
 
@@ -9,60 +6,64 @@ pipeline {
     }
 
     environment {
-        APP_DIR   = "/opt/springboot-app"
-        JAR_NAME  = "app.jar"
-        BUILD_JAR = "target/demo-0.0.2-SNAPSHOT.jar"
-
-        DOCKERHUB_USER = "ravikirankadari"
-        DOCKERHUB_PASS = "Ravi@1234"
-
-        DOCKERHUB_REPO = "ravikirankadari/spring-io"
-
-        IMAGE_TAG    = "${BUILD_NUMBER}"
-        IMAGE_FULL   = "${DOCKERHUB_REPO}:${IMAGE_TAG}"
-        IMAGE_LATEST = "${DOCKERHUB_REPO}:latest"
+        APP_DIR = "/opt/springboot-app"
+        JAR_NAME = "app.jar"
+        BUILD_JAR = "target/demo-0.0.3-SNAPSHOT.jar"
+        IMAGE = "ravikirankadari/springboot-io"
+        DOCKERHUB_CREDS = credentials('dockerhub')
     }
 
     stages {
 
         stage('Checkout') {
             steps {
-                checkout scmGit(
-                    branches: [[name: '*/main']],
-                    extensions: [],
-                    userRemoteConfigs: [[url: 'https://github.com/kadariravikiran/demo.git']]
-                )
+                checkout scm
             }
         }
 
-        stage('Build maven project') {
+        stage('Build') {
             steps {
-                sh "mvn clean install -DskipTests=true"
+                sh "mvn clean install"
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh "mvn test"
             }
         }
 
         stage('Docker Build') {
             steps {
+                sh "docker build -t ${IMAGE} ."
+            }
+        }
+
+        stage('Docker Run') {
+            steps {
+                sh "docker rm -f demo || true"
+                sh "docker run -d --name demo -p 8081:9999 ${IMAGE}"
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
                 sh """
-                  set -eux
-                  test -f ${BUILD_JAR}
-                  docker build --build-arg JAR_FILE=${BUILD_JAR} \
-                  -t ${IMAGE_LATEST} .
+                echo ${DOCKERHUB_CREDS_PSW} | docker login -u ${DOCKERHUB_CREDS_USR} --password-stdin
                 """
             }
         }
 
-        stage('Docker Login & Push') {
+        stage('Push Image') {
             steps {
-                sh """
-                  echo "${DOCKERHUB_PASS}" | docker login -u "${DOCKERHUB_USER}" --password-stdin
-                  docker push ${IMAGE_LATEST}
-                  docker logout
-                """
+                sh "docker push ${IMAGE}"
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh "cp ${BUILD_JAR} ${APP_DIR}/${JAR_NAME}"
             }
         }
     }
 }
-
-
-
